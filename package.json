@@ -4,12 +4,31 @@
   "description": "Records a game playing itself, frame by frame with its sound, and edits it into trailers (Remotion). Games plug in with a config and a driver.",
   "private": true,
   "type": "module",
-  "bin": { "trailer-kit": "bin/trailer-kit.mjs" },
+  "bin": {
+    "trailer-kit": "bin/trailer-kit.mjs"
+  },
   "dependencies": {
     "@remotion/bundler": "^4.0.535",
     "@remotion/cli": "^4.0.535",
     "@remotion/renderer": "^4.0.535",
     "puppeteer-capture": "^1.58.0",
     "puppeteer-core": "^25.14.0"
+  },
+  "license": "MIT",
+  "keywords": [
+    "game-trailer",
+    "trailer-generator",
+    "remotion",
+    "puppeteer",
+    "headless-chrome",
+    "deterministic-video",
+    "frame-by-frame-recording",
+    "indie-game",
+    "game-marketing",
+    "video-automation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IFAKA/trailer-kit.git"
   }
 }

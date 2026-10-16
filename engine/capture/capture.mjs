@@ -19,7 +19,7 @@ const { width: W, height: H, scale: SCALE } = config.viewport
 const FPS = config.fps
 fs.mkdirSync(OUT, { recursive: true })
 // the last recording's length, to guess how far along this one is (a driver that plays the same game gets much the same length each time)
-const EXPECTED = (() => { try { return JSON.parse(fs.readFileSync(path.join(OUT, 'timeline.json'), 'utf8')).seconds } catch { return config.expectedSeconds } })()
+const EXPECTED = (() => { try { const s = JSON.parse(fs.readFileSync(path.join(OUT, 'timeline.json'), 'utf8')).seconds; return s > config.expectedSeconds / 2 ? s : config.expectedSeconds } catch { return config.expectedSeconds } })() // a short test recording doesn't count
 progress({ stage: 'record', detail: 'Opening the game' })
 
 // the built game, served locally (module scripts don't load from file://), unless the config points at a running page

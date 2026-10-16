@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trailer rebuild</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Lilita+One&display=swap" rel="stylesheet" />
+<style>
+  :root { --gold: #ffcf3a; --goldD: #e39a00; --ink: #3a2300; --navy: #0e1838; --blue: #1d3474; --sky: #2c4a9a; --green: #4cc263; --red: #e5484d;
+    --panel: rgba(8, 16, 44, .62); --line: rgba(255, 255, 255, .1); --dim: rgba(255, 255, 255, .58) }
+  * { box-sizing: border-box }
+  html, body { margin: 0; height: 100% }
+  body { background: radial-gradient(ellipse at 50% 0%, var(--sky) 0%, var(--blue) 45%, var(--navy) 100%) fixed; background-color: var(--navy);
+    color: #fff; font: 500 15px/1.4 'Baloo 2', system-ui, sans-serif }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 40px; display: grid; grid-template-columns: minmax(220px, 340px) 1fr; gap: 24px }
+  h1 { grid-column: 1 / -1; margin: 0; font: 400 34px/1 'Lilita One', sans-serif; letter-spacing: .02em; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap }
+  h1 .gold { color: var(--gold); text-shadow: 0 3px 0 var(--ink) }
+  h1 small { font: 600 15px 'Baloo 2', sans-serif; color: var(--dim) }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--dim); display: inline-block; align-self: center }
+  .dot.live { background: var(--green); box-shadow: 0 0 0 0 rgba(76, 194, 99, .7); animation: ping 1.6s infinite }
+  @keyframes ping { 70% { box-shadow: 0 0 0 10px rgba(76, 194, 99, 0) } 100% { box-shadow: 0 0 0 0 rgba(76, 194, 99, 0) } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; backdrop-filter: blur(6px) }
+  .shot { position: sticky; top: 16px; align-self: start; display: flex; flex-direction: column; gap: 10px }
+  .frame { aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; background: #0a1230; border: 1px solid var(--line); display: grid; place-items: center; position: relative }
+  .frame.wide { aspect-ratio: 16 / 9 }
+  .frame img { width: 100%; height: 100%; object-fit: contain; display: block }
+  .frame .empty { color: var(--dim); text-align: center; padding: 20px }
+  .shot .cap { color: var(--dim); font-size: 13px; text-align: center }
+  .main { display: flex; flex-direction: column; gap: 18px; min-width: 0 }
+  .now .stage { font: 400 26px/1.1 'Lilita One', sans-serif; letter-spacing: .02em }
+  .now .detail { color: var(--dim); margin-top: 4px; min-height: 21px; overflow-wrap: anywhere }
+  .bar { height: 14px; border-radius: 99px; background: rgba(255, 255, 255, .1); overflow: hidden; margin: 14px 0 8px }
+  .bar > i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--goldD), var(--gold)); transition: width .4s ease }
+  .bar.small { height: 8px; margin: 10px 0 6px }
+  .bar.small > i { background: linear-gradient(90deg, #3d8f56, var(--green)) }
+  .row { display: flex; justify-content: space-between; gap: 12px; color: var(--dim); font-size: 13px; flex-wrap: wrap }
+  .row b { color: #fff; font-weight: 700 }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 14px }
+  .stat { background: rgba(255, 255, 255, .05); border-radius: 12px; padding: 10px 12px }
+  .stat .k { font-size: 12px; color: var(--dim) }
+  .stat .v { font: 700 22px/1.1 'Baloo 2', sans-serif; font-variant-numeric: tabular-nums }
+  ol.stages { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px }
+  ol.stages li { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px; color: var(--dim) }
+  ol.stages li .ic { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .25); display: grid; place-items: center; font-size: 12px }
+  ol.stages li.done { color: #fff }
+  ol.stages li.done .ic { background: var(--green); border-color: var(--green); color: #08240f }
+  ol.stages li.cur { color: #fff; background: rgba(255, 207, 58, .12) }
+  ol.stages li.cur .ic { border-color: var(--gold); border-top-color: transparent; animation: spin 1s linear infinite }
+  ol.stages li.bad .ic { background: var(--red); border-color: var(--red); animation: none }
+  ol.stages li .t { font-size: 12px; font-variant-numeric: tabular-nums }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .log { height: 340px; overflow: auto; margin: 0; padding: 12px 14px; background: rgba(0, 0, 0, .35); border-radius: 12px;
+    font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; color: #cfd6ee }
+  .log .h { color: var(--gold); font-weight: 700 }
+  .log .e { color: #ff8a8e }
+  .log .w { color: #9be3ad }
+  .logbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px }
+  .logbar h2, .panel h2 { margin: 0; font: 400 18px 'Lilita One', sans-serif; letter-spacing: .03em }
+  .panel h2 { margin-bottom: 10px }
+  label.follow { font-size: 13px; color: var(--dim); display: flex; gap: 6px; align-items: center; cursor: pointer }
+  .banner { display: none; border-radius: 14px; padding: 14px 16px; font-weight: 700 }
+  .banner.fail { display: block; background: rgba(229, 72, 77, .18); border: 1px solid var(--red) }
+  .banner.ok { display: block; background: rgba(76, 194, 99, .16); border: 1px solid var(--green) }
+  .videos { display: none; grid-template-columns: 1fr 2fr; gap: 14px; align-items: start }
+  .videos.on { display: grid }
+  .videos video { width: 100%; border-radius: 12px; background: #000; display: block }
+  .videos .cap { color: var(--dim); font-size: 13px; margin-top: 4px }
+  @media (max-width: 760px) {
+    .wrap { grid-template-columns: 1fr }
+    .shot { position: static; max-width: 300px; margin: 0 auto; width: 100% }
+    .videos { grid-template-columns: 1fr }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="dot" id="dot"></span><span><span class="gold">Trailer</span> rebuild</span><small id="conn">connecting…</small></h1>
+
+  <div class="shot">
+    <div class="frame" id="frame"><div class="empty" id="empty">The latest frame shows here once the recording starts.</div><img id="img" alt="Latest frame" hidden /></div>
+    <div class="cap" id="frameCap"></div>
+  </div>
+
+  <div class="main">
+    <div class="banner" id="banner"></div>
+
+    <div class="panel now">
+      <div class="stage" id="stage">Waiting for a rebuild</div>
+      <div class="detail" id="detail">Run <code>npm run rebuild</code> in trailer/.</div>
+      <div class="bar small"><i id="stageBar"></i></div>
+      <div class="row"><span>This step <b id="stagePct">0%</b></span><span>elapsed <b id="stageEl">–</b></span><span>left <b id="stageEta">–</b></span></div>
+      <div class="bar"><i id="allBar"></i></div>
+      <div class="row"><span>Overall <b id="allPct">0%</b></span><span>running for <b id="allEl">–</b></span><span>done in about <b id="allEta">–</b></span></div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="videos" id="videos">
+      <div><video id="vTall" controls playsinline preload="metadata"></video><div class="cap">Tall 9:16 · TikTok, Reels, Shorts</div></div>
+      <div><video id="vWide" controls playsinline preload="metadata"></video><div class="cap">Wide 16:9 · YouTube, itch.io</div></div>
+    </div>
+
+    <div class="panel"><h2>Steps</h2><ol class="stages" id="stages"></ol></div>
+
+    <div class="panel">
+      <div class="logbar"><h2>Log</h2><label class="follow"><input type="checkbox" id="follow" checked /> follow</label></div>
+      <pre class="log" id="log"></pre>
+    </div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id)
+let stages = [], p = null, lastPreview = 0
+const fmt = s => {
+  if (s == null || !isFinite(s)) return '–'
+  s = Math.max(0, Math.round(s))
+  const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60
+  return h ? `${h}h ${String(m).padStart(2, '0')}m` : m ? `${m}m ${String(x).padStart(2, '0')}s` : `${x}s`
+}
+const stat = (k, v) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c])
+
+function render() {
+  if (!p || !stages.length) return
+  const now = Date.now()
+  const idx = Math.max(0, stages.findIndex(s => s[0] === p.stage))
+  const total = stages.reduce((a, s) => a + s[2], 0)
+  const before = stages.slice(0, idx).reduce((a, s) => a + s[2], 0)
+  const f = p.stage === 'done' ? 1 : Math.min(1, p.fraction ?? 0)
+  const all = (before + stages[idx][2] * f) / total
+  const stageEl = (now - (p.stageStarted ?? now)) / 1000
+  // the time left in this step: its own estimate, else from how long it has taken so far
+  const stageEta = p.stage === 'done' ? 0 : p.eta != null ? p.eta - (now - p.updated) / 1000 : f > 0.03 ? stageEl * (1 - f) / f : null
+  // the rest of the run: an hour for all the steps (their weights), scaled by how this run's pace compares
+  const later = stages.slice(idx + 1).reduce((a, s) => a + s[2], 0) / total * 3600
+  const allEta = p.stage === 'done' ? 0 : stageEta == null ? null : stageEta + later
+
+  $('stage').textContent = p.failed ? 'Stopped' : stages[idx][1]
+  $('detail').textContent = p.detail ?? ''
+  $('stageBar').style.width = `${f * 100}%`
+  $('stagePct').textContent = `${Math.round(f * 100)}%`
+  $('stageEl').textContent = fmt(stageEl)
+  $('stageEta').textContent = fmt(stageEta)
+  $('allBar').style.width = `${all * 100}%`
+  $('allPct').textContent = `${Math.round(all * 100)}%`
+  $('allEl').textContent = fmt((now - (p.started ?? now)) / 1000)
+  $('allEta').textContent = fmt(allEta)
+  document.title = p.stage === 'done' ? '✓ Trailer done' : p.failed ? '✗ Trailer stopped' : `${Math.round(all * 100)}% · Trailer rebuild`
+
+  const s = []
+  if (p.stage === 'record') {
+    if (p.round != null) s.push(stat('Round', p.round))
+    if (p.video != null) s.push(stat('Game recorded', `${fmt(p.video)} <small style="font-size:13px;color:var(--dim)">of ~${fmt(p.expected)}</small>`))
+    if (p.video && p.real) s.push(stat('Speed', `${(p.real / p.video).toFixed(1)}s per second`))
+    if (p.frames != null) s.push(stat('Frames', p.frames.toLocaleString()))
+  } else if (p.stage === 'tall' || p.stage === 'wide') {
+    if (p.frames != null) s.push(stat('Frames drawn', `${p.frames} / ${p.total}`))
+    if (p.encodedFrames != null) s.push(stat('Frames encoded', p.encodedFrames))
+    if (p.frames && p.real) s.push(stat('Speed', `${(p.frames / p.real).toFixed(1)} fps`))
+  }
+  $('stats').innerHTML = s.join('')
+
+  $('stages').innerHTML = stages.filter(x => x[0] !== 'start').map((x, i) => {
+    const j = i + 1, cls = j < idx || p.stage === 'done' ? 'done' : j === idx ? (p.failed ? 'cur bad' : 'cur') : ''
+    const t = j === idx && p.stage !== 'done' ? fmt(stageEl) : ''
+    return `<li class="${cls}"><span class="ic">${cls === 'done' ? '✓' : p.failed && j === idx ? '!' : ''}</span><span>${x[1]}</span><span class="t">${t}</span></li>`
+  }).join('')
+
+  const banner = $('banner')
+  banner.className = 'banner' + (p.failed ? ' fail' : p.stage === 'done' ? ' ok' : '')
+  banner.textContent = p.failed ? `The rebuild stopped. ${p.detail ?? ''}` : p.stage === 'done' ? `Both trailers are ready: ${p.detail ?? ''}` : ''
+  const live = !p.failed && p.stage !== 'done' && now - p.updated < 5 * 60 * 1000
+  $('dot').className = 'dot' + (live ? ' live' : '')
+
+  if (p.preview && p.preview !== lastPreview) {
+    lastPreview = p.preview
+    const img = $('img'), next = new Image()
+    next.onload = () => { img.src = next.src; img.hidden = false; $('empty').hidden = true }
+    next.src = `/preview.png?${p.preview}`
+    const wideStill = p.stage === 'wide'
+    $('frame').classList.toggle('wide', wideStill)
+    $('frameCap').textContent = p.stage === 'record' ? 'The game as it is being recorded (one frame a second)' : 'The trailer as it is being drawn'
+  }
+  if (p.stage === 'done' && !$('videos').classList.contains('on')) {
+    $('videos').classList.add('on')
+    $('vTall').src = `/video/tall?${p.updated}`; $('vWide').src = `/video/wide?${p.updated}`
+  }
+}
+
+function addLog(text) {
+  const el = $('log'), atEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 30
+  const html = esc(text.replace(/\r/g, '')).split('\n').map(l =>
+    /^==/.test(l) ? `<span class="h">${l}</span>` : /error|Error|failed|✗/.test(l) ? `<span class="e">${l}</span>` : /^out\/|done$/.test(l) ? `<span class="w">${l}</span>` : l).join('\n')
+  el.insertAdjacentHTML('beforeend', html)
+  if (el.childNodes.length > 4000) el.textContent = el.textContent.slice(-200000)
+  if ($('follow').checked && atEnd) el.scrollTop = el.scrollHeight
+}
+
+function connect() {
+  const es = new EventSource('/events')
+  es.addEventListener('open', () => { $('conn').textContent = 'live'; $('log').textContent = '' })
+  es.addEventListener('stages', e => { stages = JSON.parse(e.data); render() })
+  es.addEventListener('progress', e => { p = JSON.parse(e.data); render() })
+  es.addEventListener('log', e => addLog(JSON.parse(e.data)))
+  es.addEventListener('error', () => { $('conn').textContent = 'reconnecting…'; $('dot').className = 'dot' })
+}
+connect()
+setInterval(render, 1000) // the clocks tick between updates
+</script>
+</body>
+</html>

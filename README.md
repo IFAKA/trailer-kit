@@ -27,7 +27,8 @@ flowchart LR
 
 The recording does not depend on how fast your computer is. This is what makes the footage smooth and the sound exact:
 
-- **Virtual time.** Chrome runs in Linux (headless, driven by `puppeteer-capture`) and the kit takes over the page's clock. `Date.now`, `performance.now`, `requestAnimationFrame`, timers and CSS animations advance exactly 1/60 s per captured frame, however long the computer takes to draw it. A slow machine records slower, never choppier: a 4.5-minute game takes about 50 minutes of real time and the video is perfect.
+- **Virtual time.** Chrome runs in Linux (headless, driven by `puppeteer-capture`) and the kit takes over the page's clock. `Date.now`, `performance.now`, `requestAnimationFrame`, timers and CSS animations advance exactly 1/60 s per captured frame, however long the computer takes to draw it. A slow machine records slower, never choppier: on an M4 Pro a 3-minute game records in about 4 minutes, and the video is perfect on any machine.
+- **Fast frames.** Each frame comes back from Chrome as a JPEG encoded for speed (quality 95), not the PNG `puppeteer-capture` asks for: compressing a 1080x1920 PNG was over 90% of the recording time (244 ms a frame against 19), which made a rebuild take about 50 minutes.
 - **Sample-accurate sound.** The page's `AudioContext` is replaced by an offline one running on that same virtual clock, so every sound lands in the track at the exact frame it happened.
 - **Moments found by events, not times.** The driver `mark()`s what happens ("ace beat a king", "tower cracked"). The edit looks those up in `out/timeline.json`, so a new recording lines up by itself after the game changes.
 - **A deterministic edit.** Each Remotion frame is a pure function of its frame number, so the same recording and edit render the same video.
@@ -47,7 +48,7 @@ The one thing the kit cannot make deterministic is **the game's own logic**: a g
 A game plugs in with a **config**, a **driver** and an **edit**, all living in the game's own repo (see below).
 
 ```
-trailer-kit rebuild [project]   build the game, record it, make the music, render and master both trailers (about an hour)
+trailer-kit rebuild [project]   build the game, record it, make the music, render and master both trailers (about 6 minutes)
 trailer-kit master  [project]   render and master again from the last recording (minutes)
 trailer-kit record  [project]   record only
 trailer-kit watch   [project]   the live progress page (http://localhost:4321; `rebuild` opens it)

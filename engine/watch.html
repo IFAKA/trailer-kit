@@ -131,8 +131,8 @@ function render() {
   const stageEl = (now - (p.stageStarted ?? now)) / 1000
   // the time left in this step: its own estimate, else from how long it has taken so far
   const stageEta = p.stage === 'done' ? 0 : p.eta != null ? p.eta - (now - p.updated) / 1000 : f > 0.03 ? stageEl * (1 - f) / f : null
-  // the rest of the run: an hour for all the steps (their weights), scaled by how this run's pace compares
-  const later = stages.slice(idx + 1).reduce((a, s) => a + s[2], 0) / total * 3600
+  // the rest of the run: about 6 minutes for all the steps (their weights)
+  const later = stages.slice(idx + 1).reduce((a, s) => a + s[2], 0) / total * 360
   const allEta = p.stage === 'done' ? 0 : stageEta == null ? null : stageEta + later
 
   $('stage').textContent = p.failed ? 'Stopped' : stages[idx][1]

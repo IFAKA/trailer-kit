@@ -72,6 +72,12 @@ const recorder = await capture(page, {
   format: PuppeteerCaptureFormat.MP4('slow'),
   customFfmpegConfig: async ff => { ff.outputOptions(['-crf 12', '-pix_fmt yuv420p']) },
 })
+// Each frame comes back as a JPEG encoded for speed. puppeteer-capture asks Chrome for a PNG, and compressing a 1080x1920 PNG was over
+// 90% of the recording's time (244 ms a frame against 19 on an M4 Pro). At quality 95 it looks the same once the video is encoded.
+if (!recorder._session) throw new Error('puppeteer-capture changed: no _session to set the frame format on (engine/capture/capture.mjs)')
+const send = recorder._session.send.bind(recorder._session)
+recorder._session.send = (method, params) =>
+  send(method, method === 'HeadlessExperimental.beginFrame' && params?.screenshot ? { ...params, screenshot: { format: 'jpeg', quality: 95, optimizeForSpeed: true } } : params)
 await page.evaluateOnNewDocument(audioHook)
 // The recorder runs the page's requestAnimationFrame callbacks itself, so Chrome sees no frame callback and skips the main-thread
 // animation update on frames where only composited animations move: element.animate(...).finished would never resolve.

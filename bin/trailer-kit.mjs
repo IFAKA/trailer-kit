@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // trailer-kit <command> [project folder]   (the folder holds trailer.config.json; default: the current one)
-//   rebuild   build the game, record it playing itself, make the music, render and master both trailers (about an hour)
+//   rebuild   build the game, record it playing itself, make the music, render and master both trailers (about 6 minutes)
 //   master    render and master again from the last recording (minutes)
 //   record    record only
 //   watch     the live progress page

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Rebuilds both trailers from the game as it is now, in one go (about an hour): builds the game, records a game in the Linux container,
+# Rebuilds both trailers from the game as it is now, in one go (about 6 minutes): builds the game, records a game in the Linux container,
 # finds its moments, makes the music, renders and masters both videos. Run via `trailer-kit rebuild`.
 set -e
 cd "$TRAILER_PROJECT"

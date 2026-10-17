@@ -7,11 +7,11 @@ import path from 'node:path'
 // the project's out/ folder: TRAILER_OUT, set by the CLI (the container gets the same path, since the project is mounted at its own path)
 const OUT = (process.env.TRAILER_OUT ?? path.join(process.cwd(), 'out')) + '/'
 const FILE = path.join(OUT, 'progress.json')
-// the stages in order, with how much of the whole hour each one takes (the recording is most of it)
+// the stages in order, with how much of the whole run (about 6 minutes) each one takes, in percent (the recording is most of it)
 export const STAGES = [
-  ['start', 'Starting', 0], ['build', 'Building the game', 1], ['record', 'Recording a game', 82], ['mux', 'Adding its sound', 1],
-  ['moments', 'Finding the moments', 1], ['music', 'Making the music', 1], ['tall', 'Rendering the tall video', 7],
-  ['wide', 'Rendering the wide video', 7], ['done', 'Done', 0],
+  ['start', 'Starting', 0], ['build', 'Building the game', 2], ['record', 'Recording a game', 70], ['mux', 'Adding its sound', 1],
+  ['moments', 'Finding the moments', 1], ['music', 'Making the music', 2], ['tall', 'Rendering the tall video', 12],
+  ['wide', 'Rendering the wide video', 12], ['done', 'Done', 0],
 ]
 
 const read = () => { try { return JSON.parse(fs.readFileSync(FILE, 'utf8')) } catch { return {} } }
